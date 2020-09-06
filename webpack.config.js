@@ -5,14 +5,14 @@ module.exports = {
 	mode: 'development',
 	entry: './src/main.js',
 	output: {
-		path: path.resolve(__dirname, 'public'),
+		path: path.resolve(__dirname, 'docs'),
 		filename: 'main.js',
 	},
 	plugins: [
 		new BrowserSyncPlugin({
 			host: 'localhost',
 			port: 3000,
-			server: { baseDir: ['public'] }
+			server: { baseDir: ['docs'] }
 		})
 	],
 	module: {
