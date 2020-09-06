@@ -1,0 +1,25 @@
+body {
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #111;
+}
+
+.configurator {
+	position: relative;
+	width: 95vmin;
+	height: 95vmin;
+}
+
+.configurator .canvas {
+	position: absolute;
+}
+
+#camera-select {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
