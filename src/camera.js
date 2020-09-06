@@ -1,5 +1,5 @@
 import anime from 'animejs/lib/anime.es.js';
-import { Object3D, Quaternion, PerspectiveCamera } from 'three';
+import { Quaternion, PerspectiveCamera } from 'three';
 
 var element = null;
 var camera = null;
@@ -15,6 +15,11 @@ export const initCamera = (_element) => {
 	refreshCamera();
 
 	return camera;
+}
+
+export const moveToCamera = (target) => {
+	moveCameraToPosition(target.parent.position);
+	pointCameraToRotation(target.parent.quaternion);
 }
 
 export const refreshCamera = () => {

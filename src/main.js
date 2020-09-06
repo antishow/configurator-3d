@@ -6,9 +6,10 @@ import {
 	Object3D,
 } from 'three';
 
-import { loadScene } from './scene';
-import { initCamera, moveCameraToPosition, pointCameraToRotation, refreshCamera } from './camera';
+import { loadScene, getActiveScene } from './scene';
+import { initCamera, moveToCamera, refreshCamera } from './camera';
 
+let blurTimeout = null;
 const element = document.getElementById('configurator');
 const renderer = new WebGLRenderer({
 	antialias: true,
@@ -34,10 +35,12 @@ const populateCameraSelect = (select, cameras) => {
 	select.innerHTML = '';
 	for (var i in cameras) {
 		const cameraContainer = cameras[i].parent;
-		const opt = document.createElement('option');
-		opt.value = cameraContainer.name;
-		opt.innerText = cameraContainer.name;
-		select.appendChild(opt);
+		if (cameraContainer.userData.targetGroup) {
+			const opt = document.createElement('option');
+			opt.value = cameraContainer.userData.targetGroup;
+			opt.innerText = cameraContainer.name;
+			select.appendChild(opt);
+		}
 	}
 }
 
@@ -47,15 +50,6 @@ const onLoadScene = (gltf) => {
 	camera.parent.position.copy(gltf.cameras[0].parent.position);
 	camera.parent.rotation.copy(gltf.cameras[0].parent.rotation);
 	camera.rotation.copy(gltf.cameras[0].rotation);
-
-	const camSelect = document.getElementById('camera-select');
-	populateCameraSelect(camSelect, gltf.cameras);
-
-	camSelect.addEventListener('change', (e) => {
-		const target = gltf.cameras[e.target.selectedIndex].parent;
-		moveCameraToPosition(target.position);
-		pointCameraToRotation(target.quaternion);
-	});
 
 	const groups = {};
 
@@ -124,7 +118,22 @@ const initialize = (element) => {
 	});
 
 	document.addEventListener('focus', (e) => {
-		console.log('Focused on ', e.target);
+		const activeScene = getActiveScene();
+		const groupCam = activeScene.cameras.find((c) => {
+			return c.parent.userData.targetGroup == e.target.name;
+		});
+
+		if (groupCam) {
+			clearTimeout(blurTimeout);
+			moveToCamera(groupCam);
+		}
+	}, true);
+
+	document.addEventListener('blur', (e) => {
+		blurTimeout = setTimeout(() => {
+			const activeScene = getActiveScene();
+			moveToCamera(activeScene.cameras[0]);
+		}, 500);
 	}, true);
 };
 
