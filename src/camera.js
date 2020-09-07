@@ -1,28 +1,30 @@
 import anime from 'animejs/lib/anime.es.js';
-import { Quaternion, PerspectiveCamera } from 'three';
-
-var element = null;
-var camera = null;
+import { Object3D, Quaternion, PerspectiveCamera } from 'three';
 
 const FIELD_OF_VIEW = 39.6;
 const FAR_PLANE = 1000;
 const NEAR_PLANE = 0.01;
 
-export const initCamera = (_element) => {
-	camera = new PerspectiveCamera(FIELD_OF_VIEW, 1, NEAR_PLANE, FAR_PLANE);
-	element = _element;
+const camera = new PerspectiveCamera(FIELD_OF_VIEW, 1, NEAR_PLANE, FAR_PLANE);
+const cameraMan = new Object3D();
 
-	refreshCamera();
+cameraMan.name = 'cameraOrientation';
+cameraMan.add(camera);
 
-	return camera;
+
+export const setCameraAngle = (target) => {
+	cameraMan.position.copy(target.parent.position);
+	cameraMan.rotation.copy(target.parent.rotation);
+	camera.rotation.copy(target.rotation);
+	camera.position.copy(target.position);
 }
 
-export const moveToCamera = (target) => {
+export const moveToCameraAngle = (target) => {
 	moveCameraToPosition(target.parent.position);
 	pointCameraToRotation(target.parent.quaternion);
 }
 
-export const refreshCamera = () => {
+export const refreshCamera = (element) => {
 	camera.aspect = element.clientWidth / element.clientHeight;
 	camera.fov = FIELD_OF_VIEW;
 	camera.updateProjectionMatrix();
@@ -30,7 +32,7 @@ export const refreshCamera = () => {
 
 export const moveCameraToPosition = (position) => {
 	return anime({
-		targets: camera.parent.position,
+		targets: cameraMan.position,
 		x: position.x,
 		y: position.y,
 		z: position.z,
@@ -40,24 +42,20 @@ export const moveCameraToPosition = (position) => {
 
 export const pointCameraToRotation = (quaternion) => {
 	const startRotation = new Quaternion();
-	startRotation.copy(camera.parent.quaternion);
+	startRotation.copy(cameraMan.quaternion);
 
 	return anime({
-		targets: camera.parent,
+		targets: cameraMan,
 		update: (animation) => {
 			Quaternion.slerp(
 				startRotation,
 				quaternion,
-				camera.parent.quaternion,
+				cameraMan.quaternion,
 				animation.progress / 100
 			);
-		}
-	})
+		},
+	});
 }
 
-export const setMainCamera = (c) => {
-	camera = c;
-	return camera;
-}
-
-export const getMainCamera = () => camera;
+export const getCamera = () => camera;
+export const getCameraman = () => cameraMan;
