@@ -38,7 +38,7 @@ export const onLoadScene = (gltf) => {
 		.add(state, group)
 		.options(groups[group])
 		.onChange(() => {
-			scene.traverse((obj) => {
+			gltf.scene.traverse((obj) => {
 				if (obj.group) {
 					obj.visible = state[obj.group] == obj.name;
 				}
